@@ -31,9 +31,17 @@ To add these secrets:
 2. Navigate to **Settings** > **Secrets and variables** > **Actions**.
 3. Click **New repository secret** and add `DIGITALOCEAN_ACCESS_TOKEN` and `REGION`.
 
+### Workflow Permissions
+
+Once you fork the repository, you'll need to update your **workflow permissions** to allow the action to commit and push changes to `version.txt`:
+
+1. Go to **Settings > Actions > General** in your forked repository.
+2. Under **Workflow permissions**, select **"Read and write permissions"**.
+3. Check the box for **"Allow GitHub Actions to create and approve pull requests"**.
+
 ### Running the Workflow
 
-Once your secrets are set, you can manually trigger the workflow:
+Once your secrets and workflow permissions are set, you can manually trigger the workflow:
 
 1. Navigate to the **Actions** tab of your repository.
 2. Select **Convert and Upload Kali Generic Cloud Image to DigitalOcean** from the left-hand sidebar.
