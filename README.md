@@ -1,6 +1,6 @@
 # Convert and Upload Kali Generic Cloud Image to DigitalOcean
 
-This GitHub Action automates the process of downloading, converting (compressing), and uploading the **Kali Linux Generic Cloud Image** to **Custom Images in DigitalOcean**.
+This GitHub Action automates the process of downloading, converting, and uploading the **Kali Linux Generic Cloud Image** to **Custom Images in DigitalOcean**.
 
 ## Features
 
