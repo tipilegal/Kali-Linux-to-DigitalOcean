@@ -33,7 +33,7 @@ To add these secrets:
 
 ### Workflow Permissions
 
-Once you fork the repository, you'll need to update your **workflow permissions** to allow the action to commit and push changes to `version.txt`:
+Once you fork the repository, you'll need to update your **workflow permissions** to allow the action to commit and push changes:
 
 1. Go to **Settings > Actions > General** in your forked repository.
 2. Under **Workflow permissions**, select **"Read and write permissions"**.
