@@ -1,0 +1,81 @@
+name: "Kali Linux to DigitalOcean"
+description: "Downloads, converts, and uploads the latest Kali Linux Generic Cloud Image to DigitalOcean Custom Images."
+inputs:
+  DIGITALOCEAN_ACCESS_TOKEN:
+    description: "DigitalOcean API token to authenticate the upload."
+    required: true
+  REGION:
+    description: "DigitalOcean region where the custom image will be uploaded (e.g., nyc3, sfo3)."
+    required: true
+  release_tag_prefix:
+    description: "Prefix for release tags to avoid conflicts with existing tags."
+    required: false
+    default: "kali-image"
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Fetch Latest Kali Linux Version
+      run: |
+        URL=$(curl -s https://kali.download/cloud-images/current/ | grep -oE 'kali-linux-[0-9]+\.[0-9]+-cloud-genericcloud-amd64.tar.xz' | head -n 1)
+        FULL_URL="https://kali.download/cloud-images/current/$URL"
+        KALI_VERSION=$(echo $URL | grep -oE '[0-9]+\.[0-9]+')
+        echo "KALI_VERSION=$KALI_VERSION" >> $GITHUB_ENV
+        echo "IMAGE_URL=$FULL_URL" >> $GITHUB_ENV
+
+    - name: Download Kali Linux Image
+      run: wget ${{ env.IMAGE_URL }}
+
+    - name: Extract Image
+      run: tar -xvf kali-linux-${{ env.KALI_VERSION }}-cloud-genericcloud-amd64.tar.xz
+
+    - name: Compress Image to gzip
+      run: gzip -c disk.raw > disk.raw.gz
+
+    - name: Versioning
+      run: |
+        if [ ! -f version.txt ]; then
+          NEW_VERSION="${{ inputs.release_tag_prefix }}-v1.0.0"  # Set NEW_VERSION for the first run with prefix
+          echo "$NEW_VERSION" > version.txt
+        else
+          VERSION=$(cat version.txt)
+          MAJOR_VERSION=$(echo $VERSION | cut -d. -f1 | sed "s/${{ inputs.release_tag_prefix }}-v//")
+          NEXT_MAJOR_VERSION=$((MAJOR_VERSION + 1))
+          NEW_VERSION="${{ inputs.release_tag_prefix }}-v$NEXT_MAJOR_VERSION.0.0"
+          echo "$NEW_VERSION" > version.txt
+        fi
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+    - name: Commit new version
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add version.txt
+        git commit -m "Update version to ${{ env.NEW_VERSION }} - Kali Linux ${{ env.KALI_VERSION }}"
+        git push
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ env.NEW_VERSION }}
+        files: ./disk.raw.gz
+        draft: false
+        prerelease: false
+
+    - name: Upload to DigitalOcean
+      run: |
+        curl -X POST "https://api.digitalocean.com/v2/images" \
+        -H "Authorization: Bearer ${{ inputs.DIGITALOCEAN_ACCESS_TOKEN }}" \
+        -H "Content-Type: application/json" \
+        -d "{
+              \"name\": \"Kali Linux ${{ env.KALI_VERSION }} from GitHub Actions\",
+              \"url\": \"https://github.com/${{ github.repository }}/releases/download/${{ env.NEW_VERSION }}/disk.raw.gz\",
+              \"distribution\": \"Debian\",
+              \"region\": \"${{ inputs.REGION }}\",
+              \"description\": \"Kali Linux\",
+              \"tags\": [\"kali\"]
+            }"
