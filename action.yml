@@ -1,6 +1,7 @@
 name: "Kali Linux to DigitalOcean"
 description: "Downloads, converts, and uploads the latest Kali Linux Generic Cloud Image to DigitalOcean Custom Images."
 icon: "arrow-up-circle"
+color: "blue"
 inputs:
   DIGITALOCEAN_ACCESS_TOKEN:
     description: "DigitalOcean API token to authenticate the upload."
