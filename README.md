@@ -1,10 +1,10 @@
-# Convert and Upload Kali Generic Cloud Image to DigitalOcean
+# Kali Linux to DigitalOcean
 
-This GitHub Action automates the process of downloading, converting, and uploading the **Kali Linux Generic Cloud Image** to **Custom Images in DigitalOcean**.
+This GitHub Action automates the process of downloading, converting, and uploading the latest **Kali Linux Generic Cloud Image** to **Custom Images in DigitalOcean**.
 
 ## Features
 
-- Downloads a specified version of the Kali Linux Generic Cloud Image (currently hardcoded to Kali Linux 2024.3).
+- Automatically downloads the latest Kali Linux Generic Cloud Image.
 - Converts and compresses the image for compatability with DigitalOcean.
 - Uploads the compressed image to DigitalOcean's Custom Images using the DigitalOcean API.
 - Versioning is maintained and incremented automatically for each upload.
@@ -47,20 +47,16 @@ Once your secrets and workflow permissions are set, you can manually trigger the
 2. Select **Convert and Upload Kali Generic Cloud Image to DigitalOcean** from the left-hand sidebar.
 3. Click **Run workflow** under the **workflow_dispatch** section.
 
-### Updating the Kali Linux Image Version
+> **DigitalOcean Processing**: Occasionally, DigitalOcean's backend can take longer to process and validate the image, especially during peak times. It may take up to 10 minutes or more for the image to be marked as **Available**.
+> 
+> If the image remains stuck in **Pending**, delete the image in DigitalOcean and try again, or try changing the region. To change the region, update the `REGION` secret in your GitHub repository to a different valid region (e.g., `nyc3`, `sfo3`).
 
-By default, the workflow is set to download and convert the **Kali Linux 2024.3 Generic Cloud Image for x64**. If a new version of the image is released, you’ll need to manually update the image URL in the workflow file.
+### Using the `disk.raw.gz` from the Release for Manual Upload
 
-To do so:
+After the workflow completes, you can manually upload the `disk.raw.gz` file in the release files to DigitalOcean using the **Import via URL** method:
 
-1. Check for the latest image version at [Kali Linux Cloud Images](https://www.kali.org/get-kali/#kali-cloud).
-2. Update the download URL in the workflow:
-    ```yml
-        - name: Download Kali Image
-          run: wget https://kali.download/cloud-images/<new-version>/<new-image-file>.tar.xz
-    ```
-
-4. Commit and push the changes to your fork.
+1. Go to **Backups & Snapshots** > **Custom Images** in the DigitalOcean dashboard.
+2. Choose **Import via URL** and provide the release URL for the `disk.raw.gz` file from your GitHub repository.
 
 ## Notes
 
