@@ -44,7 +44,7 @@ Once you fork the repository, you'll need to update your **workflow permissions*
 Once your secrets and workflow permissions are set, you can manually trigger the workflow:
 
 1. Navigate to the **Actions** tab of your repository.
-2. Select **Convert and Upload Kali Generic Cloud Image to DigitalOcean** from the left-hand sidebar.
+2. Select **Kali Linux to DigitalOcean** from the left-hand sidebar.
 3. Click **Run workflow** under the **workflow_dispatch** section.
 
 > [!WARNING]  
