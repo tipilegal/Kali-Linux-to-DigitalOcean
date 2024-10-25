@@ -51,7 +51,7 @@ Once your secrets and workflow permissions are set, you can manually trigger the
 > **DigitalOcean Processing**: Occasionally, DigitalOcean's backend can take longer to process and validate the image, especially during peak times. It may take up to 10 minutes or more for the image to be marked as **Available**. If the image remains stuck in **Pending**, delete the image in DigitalOcean and try again, or try changing the region. To change the region, update the `REGION` secret in your GitHub repository to a different valid region (e.g., `nyc3`, `sfo3`).
 
 > [!TIP]
-> After the workflow completes, you can manually upload the `disk.raw.gz` file in the release files to DigitalOcean. This is useful if you want to upload the image without rerunning the workflow:
+> After the workflow completes, you can manually upload the `disk.raw.gz` file in the release files to DigitalOcean. This is useful if you want to manually upload the image without rerunning the workflow:
 >
 > 1. Go to **Backups & Snapshots** > **Custom Images** in the DigitalOcean dashboard.
 > 2. Choose **Import via URL** and provide the release URL for the `disk.raw.gz` file from your GitHub repository.
