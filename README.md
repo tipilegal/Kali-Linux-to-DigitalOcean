@@ -11,12 +11,12 @@ This GitHub Action automates the process of downloading, converting, and uploadi
 
 ## Usage
 
-### Fork the Repository
+### 1. Fork the Repository
 
 1. Click the **Fork** button at the top of the GitHub repository page.
 2. Once forked you can use it directly from your account.
 
-### Secrets Setup
+### 2. Secrets Setup
 
 You'll need to create the following secrets in your forked repository for the action to work:
 
@@ -31,7 +31,7 @@ To add these secrets:
 2. Navigate to **Settings** > **Secrets and variables** > **Actions**.
 3. Click **New repository secret** and add `DIGITALOCEAN_ACCESS_TOKEN` and `REGION`.
 
-### Workflow Permissions
+### 3. Workflow Permissions
 
 Once you fork the repository, you'll need to update your **workflow permissions** to allow the action to commit and push changes:
 
@@ -39,7 +39,7 @@ Once you fork the repository, you'll need to update your **workflow permissions*
 2. Under **Workflow permissions**, select **"Read and write permissions"**.
 3. Check the box for **"Allow GitHub Actions to create and approve pull requests"**.
 
-### Running the Workflow
+### 4. Running the Workflow
 
 Once your secrets and workflow permissions are set, you can manually trigger the workflow:
 
@@ -47,22 +47,23 @@ Once your secrets and workflow permissions are set, you can manually trigger the
 2. Select **Convert and Upload Kali Generic Cloud Image to DigitalOcean** from the left-hand sidebar.
 3. Click **Run workflow** under the **workflow_dispatch** section.
 
-> **DigitalOcean Processing**: Occasionally, DigitalOcean's backend can take longer to process and validate the image, especially during peak times. It may take up to 10 minutes or more for the image to be marked as **Available**.
-> 
-> If the image remains stuck in **Pending**, delete the image in DigitalOcean and try again, or try changing the region. To change the region, update the `REGION` secret in your GitHub repository to a different valid region (e.g., `nyc3`, `sfo3`).
+> [!WARNING]  
+> **DigitalOcean Processing**: Occasionally, DigitalOcean's backend can take longer to process and validate the image, especially during peak times. It may take up to 10 minutes or more for the image to be marked as **Available**. If the image remains stuck in **Pending**, delete the image in DigitalOcean and try again, or try changing the region. To change the region, update the `REGION` secret in your GitHub repository to a different valid region (e.g., `nyc3`, `sfo3`).
 
-### Using the `disk.raw.gz` from the Release for Manual Upload
+> [!TIP]
+> After the workflow completes, you can manually upload the `disk.raw.gz` file in the release files to DigitalOcean. This is useful if you want to upload the image without rerunning the workflow:
+>
+> 1. Go to **Backups & Snapshots** > **Custom Images** in the DigitalOcean dashboard.
+> 2. Choose **Import via URL** and provide the release URL for the `disk.raw.gz` file from your GitHub repository.
 
-After the workflow completes, you can manually upload the `disk.raw.gz` file in the release files to DigitalOcean using the **Import via URL** method:
+## Creating a Droplet from the Custom Image
 
-1. Go to **Backups & Snapshots** > **Custom Images** in the DigitalOcean dashboard.
-2. Choose **Import via URL** and provide the release URL for the `disk.raw.gz` file from your GitHub repository.
+After the image is available in DigitalOcean, you can create a droplet from it:
 
-## Notes
-
-- **Versioning**: The workflow automatically increments the version of the image (`v1.0.0`, `v2.0.0`, etc.) and commits the updated version to `version.txt`. This ensures that each uploaded image has a unique version number.
-- **Custom Images**: This workflow uploads the Kali Linux image to DigitalOcean's **Custom Images** service. You can use this custom image to create droplets in DigitalOcean.
-- **Workflow Impact**: Running this workflow will increment the version in `version.txt`, so it's important to either fork the repository or maintain your own version tracking.
+1. Go to **Droplets** in your DigitalOcean dashboard.
+2. Select **Create Droplet**.
+3. Under **Choose an image**, select **Custom Images**.
+4. Select the Kali Linux image you uploaded.
 
 ## Contributing
 
