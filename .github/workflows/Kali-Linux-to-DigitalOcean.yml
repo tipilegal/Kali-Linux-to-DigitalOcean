@@ -1,0 +1,83 @@
+name: Kali Linux to DigitalOcean
+
+on:
+  workflow_dispatch:
+
+jobs:
+  kali-linux-to-digitalocean:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Latest Kali Linux Version
+        id: fetch_version
+        run: |
+          URL=$(curl -s https://kali.download/cloud-images/current/ | grep -oE 'kali-linux-[0-9]+\.[0-9]+-cloud-genericcloud-amd64.tar.xz' | head -n 1)
+          FULL_URL="https://kali.download/cloud-images/current/$URL"
+          VERSION=$(echo $URL | grep -oE '[0-9]+\.[0-9]+')
+          echo "KALI_VERSION=$VERSION" >> $GITHUB_ENV
+          echo "IMAGE_URL=$FULL_URL" >> $GITHUB_ENV
+
+      - name: Download Kali Linux Image
+        run: wget ${{ env.IMAGE_URL }}
+
+      - name: Extract Image
+        run: tar -xvf kali-linux-${{ env.KALI_VERSION }}-cloud-genericcloud-amd64.tar.xz
+
+      - name: Compress Image to gzip
+        run: gzip -c disk.raw > disk.raw.gz
+
+      - name: Read current release version
+        id: get_version
+        run: |
+          if [ ! -f version.txt ]; then
+            echo "v1.0.0" > version.txt  # Initialize version.txt if it doesn't exist
+          fi
+          VERSION=$(cat version.txt)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Increment release version
+        run: |
+          MAJOR_VERSION=$(echo $VERSION | cut -d. -f1 | cut -c2-)
+          NEXT_MAJOR_VERSION=$((MAJOR_VERSION + 1))
+          NEW_VERSION="v$NEXT_MAJOR_VERSION.0.0"
+          echo $NEW_VERSION > version.txt
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+      - name: Commit new version
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.txt
+          git commit -m "Update version to ${{ env.NEW_VERSION }} - Kali Linux ${{ env.KALI_VERSION }}"
+          git push
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.NEW_VERSION }}
+          files: ./disk.raw.gz
+          draft: false
+          prerelease: false
+
+      - name: Upload to DigitalOcean
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          REGION: ${{ secrets.REGION }}
+        run: |
+          curl -X POST "https://api.digitalocean.com/v2/images" \
+          -H "Authorization: Bearer $DIGITALOCEAN_ACCESS_TOKEN" \
+          -H "Content-Type: application/json" \
+          -d "{
+                \"name\": \"Kali Linux ${{ env.KALI_VERSION }} from GitHub Actions\",
+                \"url\": \"https://github.com/${{ github.repository }}/releases/download/${{ env.NEW_VERSION }}/disk.raw.gz\",
+                \"distribution\": \"Debian\",
+                \"region\": \"${{ env.REGION }}\",
+                \"description\": \"Kali Linux\",
+                \"tags\": [\"kali\"]
+              }"
