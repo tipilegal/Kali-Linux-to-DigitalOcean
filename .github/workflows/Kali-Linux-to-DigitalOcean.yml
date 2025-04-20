@@ -14,9 +14,9 @@ jobs:
       - name: Fetch Latest Kali Linux Version
         id: fetch_version
         run: |
-          URL=$(curl -s https://kali.download/cloud-images/current/ | grep -oE 'kali-linux-[0-9]+\.[0-9]+-cloud-genericcloud-amd64.tar.xz' | head -n 1)
+          URL=$(curl -s https://kali.download/cloud-images/current/ | grep -oE 'kali-linux-[0-9]+\.[0-9]+[a-z]?-cloud-genericcloud-amd64.tar.xz' | head -n 1)
           FULL_URL="https://kali.download/cloud-images/current/$URL"
-          KALI_VERSION=$(echo $URL | grep -oE '[0-9]+\.[0-9]+')
+          KALI_VERSION=$(echo $URL | grep -oE '[0-9]+\.[0-9]+[a-z]?')
           echo "KALI_VERSION=$KALI_VERSION" >> $GITHUB_ENV
           echo "IMAGE_URL=$FULL_URL" >> $GITHUB_ENV
 
